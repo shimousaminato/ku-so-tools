@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Googleログインテスト</title>
+</head>
+<body>
+
+    <h2>URL保存アプリ（プロトタイプ）</h2>
+
+    <div id="login-section">
+        <button id="btn-login">Googleでログイン</button>
+    </div>
+
+    <div id="user-section" style="display: none;">
+        <p>こんにちは、<span id="user-name"></span>さん！</p>
+        <button id="btn-logout">ログアウト</button>
+        <hr>
+        <input type="url" id="url-input" placeholder="保存したいURLを入力">
+        <button id="btn-save">保存（後ほど実装）</button>
+    </div>
+
+    <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyDr2DAHgMy4ofNuwCk79xFkJi5lyaaRGXw",
+    authDomain: "clipping-36693.firebaseapp.com",
+    projectId: "clipping-36693",
+    storageBucket: "clipping-36693.firebasestorage.app",
+    messagingSenderId: "21192805724",
+    appId: "1:21192805724:web:68e6d15afbb402b6094599",
+    measurementId: "G-GJXGB92GJD"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+        const auth = getAuth();
+        const provider = new GoogleAuthProvider();
+
+        // ログイン処理
+        document.getElementById('btn-login').onclick = () => {
+            signInWithPopup(auth, provider).catch(err => console.error(err));
+        };
+
+        // ログアウト処理
+        document.getElementById('btn-logout').onclick = () => {
+            signOut(auth);
+        };
+
+        // ログイン状態を監視してUIを切り替える
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // ログイン中
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('user-section').style.display = 'block';
+                document.getElementById('user-name').innerText = user.displayName;
+            } else {
+                // 未ログイン
+                document.getElementById('login-section').style.display = 'block';
+                document.getElementById('user-section').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
