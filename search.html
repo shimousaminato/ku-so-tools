@@ -67,7 +67,7 @@
 
       // --- チェック2: ページ数の自然数チェック (追加箇所) ---
       // 値が "0" または 0以下 の場合
-      if (pageInput.value !== "" && parseInt(pageInput.value) <= 0 || parseInt(pageInput.value) == ) {
+      if (pageInput.value !== "" && parseInt(pageInput.value) <= 0 ) {
         e.preventDefault();
         alert('ページ数には必ず自然数（1以上）を入力してください。');
         return;
