@@ -47,40 +47,41 @@
  <script>
   const form = document.getElementById('kusosearch');
   const select = document.getElementById('common');
+  const pageInput = document.getElementById('pag'); // 要素を取得
 
   form.addEventListener('submit', (e) => {
-    // 送信ボタンが押された瞬間に、チェックされているボタンを探す
     const selectedRadio = document.querySelector('input[name="dest"]:checked');
     
     if (selectedRadio) {
-      // ① 送信先を決定する
+      // 送信先を決定
       form.action = selectedRadio.value;
 
-      // ② 条件判定（空想文章のチェック）
+      // --- チェック1: 空想文章の制限 ---
       const site = selectedRadio.id;
       const selectedId = select.options[select.selectedIndex].id;
-
       if (site === "memo" && selectedId.startsWith("mn")) {
-        e.preventDefault(); // 送信を止める
+        e.preventDefault();
         alert("空想文章では文章量、文章数、距離の検索機能は廃止されました。");
-        return; // ここで終了。nameは消さない。
+        return;
       }
 
-      // ③ URLを綺麗にする（重要！）
-      // actionを決定した後にnameを消すことで、URLに「dest=...」が載らなくなる
+      // --- チェック2: ページ数の自然数チェック (追加箇所) ---
+      // 値が "0" または 0以下 の場合
+      if (pageInput.value !== "" && parseInt(pageInput.value) <= 0) {
+        e.preventDefault();
+        alert('ページ数には必ず自然数（1以上）を入力してください。');
+        return;
+      }
+
+      // URLを綺麗にする
       selectedRadio.removeAttribute('name');
     }
   });
 
-  // ページを戻った時にnameが消えたままだと困るので、復活させるおまじない
   window.addEventListener('pageshow', () => {
     const radios = document.querySelectorAll('input[type="radio"]');
     radios.forEach(r => r.setAttribute('name', 'dest'));
   });
-  const page = document.getElementById('pag')
-   if (page == "0"){
-    alert('ページ数には必ず自然数を入力してください。');
-   }
 </script>
 </body>
 </html>
