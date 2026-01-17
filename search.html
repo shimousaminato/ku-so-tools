@@ -6,12 +6,12 @@
   <title>空想ツール</title>
   <link rel="stylesheet" href="https://shimousaminato.github.io/ku-so-tools/index.css">
   <style>
-    input{
-      display: none;
-    }
-    input:checked::before{
-      content:"✅";
-    }
+input[type="radio"] {
+  display: none;
+}
+input[type="radio"]:checked + span::before {
+  content: "✅";
+}
   </style>
 </head>
 <body>
