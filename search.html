@@ -8,24 +8,24 @@
 </head>
 <body>
   <form id="kusosearch" method="GET">
-<label><input type="radio" id="railway" value="https://ku-tetsu.net/list.html" checked>空想鉄道</label>
-<label><input type="radio" id="oldrailway" value="https://old.ku-tetsu.net/list.html">空想旧鉄</label>
-<label><input type="radio" id="road" value="https://road.chi-zu.net/list.html">空想道路</label>
-<label><input type="radio" id="any" value="https://any.chi-zu.net/list.html">空想地図</label>
-<label><input type="radio" id="chart" value="https://chart.chi-zu.net/list.html">空想路線図</label>
-<label><input type="radio" id="pict" value="https://pict.zu-ga.net/list.html">空想図画</label>
-<label><input type="radio" id="memo" value="https://memo.zu-ga.net/list.html">空想文章</label>
-<label><input type="radio" id="annex" value="https://annex.chi-zu.net/list.html">空想別館</label><br>
-<label><input type="radio" id="timetable" value="https://timetable.zu-ga.net/list.html">時刻表くらぶ</label>
-<label><input type="radio" id="point" value="https://point.zu-ga.net/list.html">点描くらぶ</label>
-<label><input type="radio" id="nigaoe" value="https://nigaoe.zu-ga.net/list.html">似顔絵くらぶ</label>
-<label><input type="radio" id="quiz" value="https://quiz.zu-ga.net/list.html">問題くらぶ</label><br>
-<label><input type="radio" id="doshusei" value="https://doshusei.chi-zu.net/list.html">道州制ふぁん</label>
-<label><input type="radio" id="osakato" value="https://osakato.chi-zu.net/list.html">大阪都ふぁん</label>
-<label><input type="radio" id="tokyoto" value="https://tokyoto.chi-zu.net/list.html">東京都ふぁん</label>
-<label><input type="radio" id="ritsuryo" value="https://ritsuryo.chi-zu.net/list.html">律令国ふぁん</label>
-<label><input type="radio" id="rokutairiku" value="https://rokutairiku.chi-zu.net/list.html">六大陸ふぁん</label>
-<label><input type="radio" id="nurie" value="https://nurie.zu-ga.net/list.html">地図ぬりえ</label><br>
+<label><input type="radio" name="dest" id="railway" value="https://ku-tetsu.net/list.html" checked>空想鉄道</label>
+<label><input type="radio" name="dest" id="oldrailway" value="https://old.ku-tetsu.net/list.html">空想旧鉄</label>
+<label><input type="radio" name="dest" id="road" value="https://road.chi-zu.net/list.html">空想道路</label>
+<label><input type="radio" name="dest" id="any" value="https://any.chi-zu.net/list.html">空想地図</label>
+<label><input type="radio" name="dest" id="chart" value="https://chart.chi-zu.net/list.html">空想路線図</label>
+<label><input type="radio" name="dest" id="pict" value="https://pict.zu-ga.net/list.html">空想図画</label>
+<label><input type="radio" name="dest" id="memo" value="https://memo.zu-ga.net/list.html">空想文章</label>
+<label><input type="radio" name="dest" id="annex" value="https://annex.chi-zu.net/list.html">空想別館</label><br>
+<label><input type="radio" name="dest" id="timetable" value="https://timetable.zu-ga.net/list.html">時刻表くらぶ</label>
+<label><input type="radio" name="dest" id="point" value="https://point.zu-ga.net/list.html">点描くらぶ</label>
+<label><input type="radio" name="dest" id="nigaoe" value="https://nigaoe.zu-ga.net/list.html">似顔絵くらぶ</label>
+<label><input type="radio" name="dest" id="quiz" value="https://quiz.zu-ga.net/list.html">問題くらぶ</label><br>
+<label><input type="radio" name="dest" id="doshusei" value="https://doshusei.chi-zu.net/list.html">道州制ふぁん</label>
+<label><input type="radio" name="dest" id="osakato" value="https://osakato.chi-zu.net/list.html">大阪都ふぁん</label>
+<label><input type="radio" name="dest" id="tokyoto" value="https://tokyoto.chi-zu.net/list.html">東京都ふぁん</label>
+<label><input type="radio" name="dest" id="ritsuryo" value="https://ritsuryo.chi-zu.net/list.html">律令国ふぁん</label>
+<label><input type="radio" name="dest" id="rokutairiku" value="https://rokutairiku.chi-zu.net/list.html">六大陸ふぁん</label>
+<label><input type="radio" name="dest" id="nurie" value="https://nurie.zu-ga.net/list.html">地図ぬりえ</label><br>
 <input type="search" name="f1" placeholder="作品名" size="10">
 <input type="search" name="f2" placeholder="登録者名" size="10">
 <input type="search" name="f3" placeholder="説明" size="10">
@@ -50,7 +50,7 @@ const form = document.getElementById('kusosearch');
 
     form.addEventListener('submit', (e) => {
       // 2. 「送信ボタンが押された瞬間」に、どのラジオボタンが選ばれているか取得する
-      const selectedRadio = document.querySelector('input[name="dest"]:checked');
+      const selectedRadio = document.querySelector('input[type="radio"]:checked');
       
       if (selectedRadio) {
         // actionを選択されたURLに書き換える
