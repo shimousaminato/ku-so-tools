@@ -44,29 +44,39 @@
 </select>
 <input type="submit" value="作品検索">
 </form><br>
-  <script>
-const form = document.getElementById('kusosearch');
-    const select = document.getElementById('common');
+ <script>
+  const form = document.getElementById('kusosearch');
+  const select = document.getElementById('common');
 
-    form.addEventListener('submit', (e) => {
-      // 2. 「送信ボタンが押された瞬間」に、どのラジオボタンが選ばれているか取得する
-      const selectedRadio = document.querySelector('input[type="radio"]:checked');
-      
-      if (selectedRadio) {
-        // actionを選択されたURLに書き換える
-        form.action = selectedRadio.value;
+  form.addEventListener('submit', (e) => {
+    // 送信ボタンが押された瞬間に、チェックされているボタンを探す
+    const selectedRadio = document.querySelector('input[name="dest"]:checked');
+    
+    if (selectedRadio) {
+      // ① 送信先を決定する
+      form.action = selectedRadio.value;
 
-        // 3. IDを取得して条件判定をする（イベントの中でやる必要がある）
-        const site = selectedRadio.id; // 文字列としてのid（例: "memo"）
-        const selectedId = select.options[select.selectedIndex].id; // 選択されたoptionのid
+      // ② 条件判定（空想文章のチェック）
+      const site = selectedRadio.id;
+      const selectedId = select.options[select.selectedIndex].id;
 
-        // siteは変数ではなく文字列なので " " で囲む。IDは mn1, mn2... なので前方一致で判定。
-        if (site === "memo" && selectedId.startsWith("mn")) {
-          e.preventDefault(); // 送信（ページ遷移）を中止する
-          alert("空想文章では文章量、文章数、距離の検索機能は廃止されました。");
-        }
+      if (site === "memo" && selectedId.startsWith("mn")) {
+        e.preventDefault(); // 送信を止める
+        alert("空想文章では文章量、文章数、距離の検索機能は廃止されました。");
+        return; // ここで終了。nameは消さない。
       }
-    });
-  </script>
+
+      // ③ URLを綺麗にする（重要！）
+      // actionを決定した後にnameを消すことで、URLに「dest=...」が載らなくなる
+      selectedRadio.removeAttribute('name');
+    }
+  });
+
+  // ページを戻った時にnameが消えたままだと困るので、復活させるおまじない
+  window.addEventListener('pageshow', () => {
+    const radios = document.querySelectorAll('input[type="radio"]');
+    radios.forEach(r => r.setAttribute('name', 'dest'));
+  });
+</script>
 </body>
 </html>
