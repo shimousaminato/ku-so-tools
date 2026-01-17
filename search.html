@@ -36,35 +36,37 @@
 <option value="map_update_date_desc">更新日(新)順</option>
 <option value="comment_date_desc">コメント日(新)順</option>
 <option value="comment_date_asc">コメント日(古)順</option>
-<option value="lnamt_desc">路線数順</option>
-<option value="stamt_desc">駅数順</option>
-<option value="dist_desc">距離順</option>
+<option id="mn1" value="lnamt_desc">路線数順</option>
+<option id="mn2" value="stamt_desc">駅数順</option>
+<option id="mn3" value="dist_desc">距離順</option>
 <option value="comment_count_desc">コメント数順</option>
 <option value="access_count_desc">アクセス数順</option>
 </select>
 <input type="submit" value="作品検索">
 </form><br>
   <script>
-const form = document.getElementById('myForm');
+const form = document.getElementById('kusosearch');
+    const select = document.getElementById('common');
 
-  form.addEventListener('submit', (e) => {
-    // 選択されているラジオボタンを取得
-    const selectedRadio = document.querySelector('input[name="dest"]:checked');
-    
-    if (selectedRadio) {
-      // formのactionを選択したvalue（またはid）に書き換える
-      form.action = selectedRadio.value;
-    }
-  });
-const site = selectedRadio.id;
-const select = document.getElementById('pageSelect');
+    form.addEventListener('submit', (e) => {
+      // 2. 「送信ボタンが押された瞬間」に、どのラジオボタンが選ばれているか取得する
+      const selectedRadio = document.querySelector('input[name="dest"]:checked');
+      
+      if (selectedRadio) {
+        // actionを選択されたURLに書き換える
+        form.action = selectedRadio.value;
 
-  select.addEventListener('change', () => {
-    const selectedId = select.options[select.selectedIndex].id;
-    if (site = )
+        // 3. IDを取得して条件判定をする（イベントの中でやる必要がある）
+        const site = selectedRadio.id; // 文字列としてのid（例: "memo"）
+        const selectedId = select.options[select.selectedIndex].id; // 選択されたoptionのid
 
-
-
+        // siteは変数ではなく文字列なので " " で囲む。IDは mn1, mn2... なので前方一致で判定。
+        if (site === "memo" && selectedId.startsWith("mn")) {
+          e.preventDefault(); // 送信（ページ遷移）を中止する
+          alert("空想文章では文章量、文章数、距離の検索機能は廃止されました。");
+        }
+      }
+    });
   </script>
 </body>
 </html>
