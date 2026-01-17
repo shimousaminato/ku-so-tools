@@ -7,21 +7,64 @@
   <link rel="stylesheet" href="https://shimousaminato.github.io/ku-so-tools/index.css">
 </head>
 <body>
-  <form action="https://memo.chi-zu.net/list.html">
+  <form id="kusosearch" method="GET">
+<label><input type="radio" name="dest" id="railway" value="https://ku-tetsu.net/list.html" checked> ページAへ</label><br>
+<label><input type="radio" name="dest" id="oldrailway" value="https://old.ku-tetsu.net/list.html"> ページBへ</label><br>
+<label><input type="radio" name="dest" id="road" value="https://road.chi-zu.net/list.html"> ページBへ</label><br>
+<label><input type="radio" name="dest" id="any" value="https://any.chi-zu.net/list.html"> ページBへ</label><br>
+<label><input type="radio" name="dest" id="chart" value="https://chart.chi-zu.net/list.html"> ページBへ</label><br>
+<label><input type="radio" name="dest" id="pict" value="https://pict.zu-ga.net/list.html"> ページBへ</label><br>
+<label><input type="radio" name="dest" id="memo" value="https://memo.zu-ga.net/list.html"> ページBへ</label><br>
+<label><input type="radio" name="dest" id="annex" value="https://annex.chi-zu.net/list.html"> ページBへ</label><br>
+<label><input type="radio" name="dest" id="timetable" value="https://timetable.zu-ga.net/list.html"> ページBへ</label><br>
+<label><input type="radio" name="dest" id="point" value="https://point.zu-ga.net/list.html"> ページBへ</label><br>
+<label><input type="radio" name="dest" id="nigaoe" value="https://nigaoe.zu-ga.net/list.html"> ページBへ</label><br>
+<label><input type="radio" name="dest" id="quiz" value="https://quiz.zu-ga.net/list.html"> ページBへ</label><br>
+<label><input type="radio" name="dest" id="doshusei" value="https://doshusei.chi-zu.net/list.html"> ページBへ</label><br>
+<label><input type="radio" name="dest" id="osakato" value="https://osakato.chi-zu.net/list.html"> ページBへ</label><br>
+<label><input type="radio" name="dest" id="tokyoto" value="https://tokyoto.chi-zu.net/list.html"> ページBへ</label><br>
+<label><input type="radio" name="dest" id="ritsuryo" value="https://ritsuryo.chi-zu.net/list.html"> ページBへ</label><br>
+<label><input type="radio" name="dest" id="rokutairiku" value="https://rokutairiku.chi-zu.net/list.html"> ページBへ</label><br>
+<label><input type="radio" name="dest" id="nurie" value="https://nurie.zu-ga.net/list.html"> ページBへ</label><br>
 <input type="search" name="f1" placeholder="作品名" size="10">
 <input type="search" name="f2" placeholder="登録者名" size="10">
 <input type="search" name="f3" placeholder="説明" size="10">
 <input type="search" name="p" placeholder="ページ数(数字)" size="10">
-<select name="o">
+<select name="o" id="common">
 <option value="">登録日(新)順</option>
 <option value="regist_date_asc">登録日(古)順</option>
 <option value="map_update_date_desc">更新日(新)順</option>
 <option value="comment_date_desc">コメント日(新)順</option>
 <option value="comment_date_asc">コメント日(古)順</option>
+<option value="lnamt_desc">路線数順</option>
+<option value="stamt_desc">駅数順</option>
+<option value="dist_desc">距離順</option>
 <option value="comment_count_desc">コメント数順</option>
 <option value="access_count_desc">アクセス数順</option>
 </select>
 <input type="submit" value="作品検索">
 </form><br>
+  <script>
+const form = document.getElementById('myForm');
+
+  form.addEventListener('submit', (e) => {
+    // 選択されているラジオボタンを取得
+    const selectedRadio = document.querySelector('input[name="dest"]:checked');
+    
+    if (selectedRadio) {
+      // formのactionを選択したvalue（またはid）に書き換える
+      form.action = selectedRadio.value;
+    }
+  });
+const site = selectedRadio.id;
+const select = document.getElementById('pageSelect');
+
+  select.addEventListener('change', () => {
+    const selectedId = select.options[select.selectedIndex].id;
+    if (site = )
+
+
+
+  </script>
 </body>
 </html>
