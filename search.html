@@ -29,7 +29,7 @@
 <input type="search" name="f1" placeholder="作品名" size="10">
 <input type="search" name="f2" placeholder="登録者名" size="10">
 <input type="search" name="f3" placeholder="説明" size="10">
-<input type="search" name="p" placeholder="ページ数(数字)" size="10">
+<input type="search" id="pag" name="p" placeholder="ページ数(数字)" size="10">
 <select name="o" id="common">
 <option value="">登録日(新)順</option>
 <option value="regist_date_asc">登録日(古)順</option>
@@ -77,6 +77,10 @@
     const radios = document.querySelectorAll('input[type="radio"]');
     radios.forEach(r => r.setAttribute('name', 'dest'));
   });
+  const page = document.getElementById('pag')
+   if (page == "0"){
+    alert('ページ数には必ず自然数を入力してください。');
+   }
 </script>
 </body>
 </html>
