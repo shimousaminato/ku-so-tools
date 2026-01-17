@@ -9,8 +9,13 @@
 input[type="radio"] {
   display: none;
 }
-input[type="radio"]:checked + label::before {
+label:has(input:checked)::before {
   content: "✅";
+  margin-right: 4px;
+}
+label:has(input:checked) {
+  font-weight: bold;
+  color: red;
 }
   </style>
 </head>
