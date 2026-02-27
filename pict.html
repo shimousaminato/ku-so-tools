@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>画像ビューアー</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .image-container {
+            min-height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #e2e8f0;
+            border-radius: 0.5rem;
+            margin-top: 1.5rem;
+            overflow: hidden;
+            background-color: #f8fafc;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        .tab-active {
+            border-bottom: 2px solid #2563eb;
+            color: #2563eb;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white rounded-xl shadow-lg max-w-lg w-full overflow-hidden">
+        <!-- タブ部分 -->
+        <div class="flex border-b border-gray-200 bg-gray-50">
+            <button onclick="setMode('zuga')" id="tab-zuga" class="flex-1 py-3 text-sm text-gray-600 hover:bg-white transition tab-active">図画</button>
+            <button onclick="setMode('tenbyo')" id="tab-tenbyo" class="flex-1 py-3 text-sm text-gray-600 hover:bg-white transition">点描</button>
+            <button onclick="setMode('nigaoe')" id="tab-nigaoe" class="flex-1 py-3 text-sm text-gray-600 hover:bg-white transition">似顔絵</button>
+            <button onclick="setMode('jinuri')" id="tab-jinuri" class="flex-1 py-3 text-sm text-gray-600 hover:bg-white transition">地塗</button>
+            <button onclick="setMode('shiteki')" id="tab-shiteki" class="flex-1 py-3 text-sm text-gray-600 hover:bg-white transition">私的</button>
+        </div>
+
+        <div class="p-8">
+            <h1 id="modeTitle" class="text-xl font-bold text-gray-800 mb-6 text-center">図画モード</h1>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="imageInput" class="block text-sm font-medium text-gray-700 mb-1" id="inputLabel">画像番号を入力してください</label>
+                    <input type="number" id="imageInput" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                           placeholder="例: 123">
+                </div>
+                
+                <button id="submitBtn" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition duration-200">
+                    画像を表示する
+                </button>
+            </div>
+
+            <div id="resultArea" class="hidden animate-fade-in">
+                <div class="mt-6 text-xs text-gray-400 break-all bg-gray-50 p-2 rounded">
+                    <span class="font-semibold text-gray-600">URL:</span> 
+                    <span id="displayUrl"></span>
+                </div>
+                
+                <div class="image-container">
+                    <img id="targetImage" src="" alt="画像読み込み中..." onerror="handleImageError()">
+                </div>
+            </div>
+
+            <div id="errorMsg" class="hidden mt-4 p-3 bg-red-100 text-red-700 rounded-md text-sm text-center">
+                有効な値を入力してください。
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const input = document.getElementById('imageInput');
+        const btn = document.getElementById('submitBtn');
+        const resultArea = document.getElementById('resultArea');
+        const displayUrl = document.getElementById('displayUrl');
+        const targetImage = document.getElementById('targetImage');
+        const errorMsg = document.getElementById('errorMsg');
+        const modeTitle = document.getElementById('modeTitle');
+        const inputLabel = document.getElementById('inputLabel');
+
+        const configs = {
+            zuga: { name: "図画", url: "https://pict.zu-ga.net/pict.php?n=", type: "number" },
+            tenbyo: { name: "点描", url: "https://point.zu-ga.net/pict.php?n=", type: "number" },
+            nigaoe: { name: "似顔絵", url: "https://nigaoe.zu-ga.net/pict.php?n=", type: "number" },
+            jinuri: { name: "地塗", url: "https://nurie.zu-ga.net/pict.php?n=", type: "number" },
+            shiteki: { name: "私的", url: "https://nurie.zu-ga.net/pict.php?n=", type: "text" }
+        };
+
+        let currentMode = 'zuga';
+
+        function setMode(mode) {
+            currentMode = mode;
+            const config = configs[mode];
+
+            // タブの見た目更新
+            Object.keys(configs).forEach(m => {
+                document.getElementById('tab-' + m).classList.remove('tab-active');
+            });
+            document.getElementById('tab-' + mode).classList.add('tab-active');
+
+            // モードに応じたUI変更
+            modeTitle.textContent = config.name + "モード";
+            input.type = config.type;
+            input.placeholder = config.type === "number" ? "例: 123" : "自由なIDを入力";
+            inputLabel.textContent = config.type === "number" ? "画像番号を入力してください" : "識別子を入力してください";
+            
+            // 入力をクリアして非表示に
+            input.value = "";
+            resultArea.classList.add('hidden');
+            errorMsg.classList.add('hidden');
+        }
+
+        function showImage() {
+            const val = input.value.trim();
+            
+            if (val === "") {
+                errorMsg.classList.remove('hidden');
+                resultArea.classList.add('hidden');
+                return;
+            }
+
+            errorMsg.classList.add('hidden');
+            const finalUrl = configs[currentMode].url + val;
+            
+            displayUrl.textContent = finalUrl;
+            targetImage.src = finalUrl;
+            resultArea.classList.remove('hidden');
+        }
+
+        function handleImageError() {
+            // 画像がない場合の代替処理（必要に応じて）
+        }
+
+        btn.addEventListener('click', showImage);
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') showImage();
+        });
+    </script>
+</body>
+</html>
