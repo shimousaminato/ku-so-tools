@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTMLグラフ作成プレイグラウンド</title>
+    <title>100%割合グラフ作成プレイグラウンド</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
@@ -14,14 +14,6 @@
         body {
             font-family: 'Inter', 'Noto Sans JP', sans-serif;
         }
-        /* CSSグラフ用のアニメーション */
-        .css-bar {
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        /* SVGグラフ用のアニメーション */
-        .svg-element {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen p-4 md:p-8">
@@ -29,8 +21,8 @@
     <div class="max-w-4xl mx-auto">
         <!-- ヘッダー -->
         <header class="mb-8 text-center">
-            <h1 class="text-2xl md:text-3xl font-bold text-slate-900 mb-2">📈 折れ線グラフ 作成プレイグラウンド</h1>
-            <p class="text-slate-600 text-sm md:text-base">Chart.jsを使って、データ数の多い折れ線グラフもスッキリ見やすく作成できます。</p>
+            <h1 class="text-2xl md:text-3xl font-bold text-slate-900 mb-2">📊 グラフ作成プレイグラウンド（100%割合 ＆ 折れ線カスタム）</h1>
+            <p class="text-slate-600 text-sm md:text-base">「100%割合グラフ」と「通常の折れ線グラフ（実数値）」を自由に切り替えて作成できます。</p>
         </header>
 
         <!-- データ入力＆オプションコントロールパネル -->
@@ -43,20 +35,20 @@
                         データの一括入力（1行につき1データ）
                     </h2>
                     <div class="flex flex-wrap gap-2">
-                        <button onclick="setSampleData('single')" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition">
-                            例1: 1本の線
+                        <button onclick="setSampleData('preset')" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition">
+                            19項目プリセットに戻す
                         </button>
-                        <button onclick="setSampleData('multi')" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition">
-                            例2: 2本の線を比較
+                        <button onclick="setSampleData('demo')" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition">
+                            デモデータで試す
                         </button>
                         <button onclick="addSeries()" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition shadow-sm">
-                            ＋ 線を追加
+                            ＋ 項目を追加
                         </button>
                     </div>
                 </div>
                 
-                <p class="text-xs text-slate-500 mb-3">
-                    各ボックスに数値を1行ずつ貼り付けてください（横軸ラベルは自動で <code class="bg-slate-100 px-1 rounded">1, 2, 3...</code> になります）。「＋ 線を追加」で複数系列を比較できます。
+                <p id="mode-helper-text" class="text-xs text-slate-500 mb-3">
+                    各ボックスに実数値（アクセス数や件数など）を1行ずつ貼り付けると、各行の合計を<strong>100%</strong>としたときの占有率（％）を自動計算します。
                 </p>
 
                 <!-- 動的に増減する系列入力グリッド -->
@@ -65,19 +57,29 @@
                 </div>
             </div>
 
-            <!-- 折れ線グラフ専用オプション -->
+            <!-- グラフ専用オプション -->
             <div class="pt-4 border-t border-slate-100 flex flex-wrap items-center gap-6">
-                <label class="flex items-center gap-2 cursor-pointer select-none">
+                <!-- グラフ形式の切り替え -->
+                <div class="flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-200">
+                    <span class="text-sm font-bold text-indigo-900">表示形式:</span>
+                    <select id="opt-chart-type" onchange="updateAllCharts()" class="bg-white border border-indigo-300 rounded-lg px-2 py-1 text-xs font-bold text-slate-700 focus:outline-none focus:border-indigo-500">
+                        <option value="area">100%積み上げ面グラフ（割合）</option>
+                        <option value="bar">100%積み上げ棒グラフ（割合）</option>
+                        <option value="line">通常の折れ線グラフ（実数値）</option>
+                    </select>
+                </div>
+
+                <label id="smooth-wrapper" class="flex items-center gap-2 cursor-pointer select-none">
                     <input type="checkbox" id="opt-smooth" checked onchange="updateAllCharts()" class="w-4 h-4 accent-indigo-600 rounded">
                     <span class="text-sm font-bold text-slate-700">線をなめらかにする（曲線）</span>
                 </label>
 
-                <label class="flex items-center gap-2 cursor-pointer select-none">
-                    <input type="checkbox" id="opt-fill" checked onchange="updateAllCharts()" class="w-4 h-4 accent-indigo-600 rounded">
-                    <span class="text-sm font-bold text-slate-700">線の下を塗りつぶす（エリア）</span>
+                <label id="fill-wrapper" class="hidden flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="opt-fill" onchange="updateAllCharts()" class="w-4 h-4 accent-indigo-600 rounded">
+                    <span class="text-sm font-bold text-slate-700">線の下を塗りつぶす</span>
                 </label>
 
-                <label class="flex items-center gap-2 cursor-pointer select-none">
+                <label id="points-wrapper" class="flex items-center gap-2 cursor-pointer select-none">
                     <input type="checkbox" id="opt-points" onchange="updateAllCharts()" class="w-4 h-4 accent-indigo-600 rounded">
                     <span class="text-sm font-bold text-slate-700">頂点の丸（ポイント）を表示</span>
                 </label>
@@ -96,16 +98,16 @@
                     </button>
                 </div>
 
-                <!-- Y軸（値）の上限・下限指定 -->
+                <!-- Y軸の上限・下限指定 -->
                 <div class="flex flex-wrap items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
-                    <span class="text-sm font-bold text-slate-700">値の範囲:</span>
-                    <input type="number" id="y-min" step="any" placeholder="下限(自動)" oninput="updateAllCharts()"
+                    <span id="ybounds-label" class="text-sm font-bold text-slate-700">割合の範囲(%):</span>
+                    <input type="number" id="y-min" step="any" placeholder="0" oninput="updateAllCharts()"
                         class="w-24 px-2 py-1 bg-white border border-slate-300 rounded-lg text-xs font-mono text-center focus:outline-none focus:border-indigo-500">
                     <span class="text-slate-500 text-xs font-bold">〜</span>
-                    <input type="number" id="y-max" step="any" placeholder="上限(自動)" oninput="updateAllCharts()"
+                    <input type="number" id="y-max" step="any" placeholder="100" oninput="updateAllCharts()"
                         class="w-24 px-2 py-1 bg-white border border-slate-300 rounded-lg text-xs font-mono text-center focus:outline-none focus:border-indigo-500">
-                    <button type="button" onclick="resetYBounds()" class="ml-1 px-2 py-1 bg-white hover:bg-slate-100 border border-slate-300 text-slate-600 text-[11px] font-bold rounded-md transition">
-                        自動
+                    <button type="button" id="ybounds-reset-btn" onclick="resetYBounds()" class="ml-1 px-2 py-1 bg-white hover:bg-slate-100 border border-slate-300 text-slate-600 text-[11px] font-bold rounded-md transition">
+                        0〜100%
                     </button>
                     <label class="ml-2 pl-2 border-l border-slate-300 flex items-center gap-1.5 cursor-pointer select-none">
                         <input type="checkbox" id="opt-copy-ybounds" checked onchange="updateAllCharts()" class="w-3.5 h-3.5 accent-indigo-600 rounded">
@@ -122,12 +124,12 @@
             <div id="panel-chartjs">
                 <div class="mb-6 pb-4 border-b border-slate-100">
                     <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md">Chart.js プレビュー</span>
-                    <h3 class="text-xl font-bold mt-1">折れ線グラフ</h3>
-                    <p class="text-sm text-slate-500 mt-1">頂点の丸を非表示にしても、線の上にカーソルを合わせれば各データの数値がポップアップします。</p>
+                    <h3 id="preview-title" class="text-xl font-bold mt-1">100% 構成比（占有率）グラフ</h3>
+                    <p id="preview-desc" class="text-sm text-slate-500 mt-1">カーソルを合わせると、各項目の「割合（％）」と「元の数値」の両方がポップアップで表示されます。</p>
                 </div>
 
                 <!-- キャンバスコンテナ -->
-                <div class="relative w-full max-w-2xl mx-auto h-72 md:h-80">
+                <div class="relative w-full max-w-2xl mx-auto h-80 md:h-96">
                     <canvas id="myChart"></canvas>
                 </div>
             </div>
@@ -139,7 +141,7 @@
                         <h4 class="font-bold text-slate-800 text-base flex items-center gap-2">
                             📋 このグラフのHTMLコード（コピペ用）
                         </h4>
-                        <p class="text-xs text-slate-500">現在のオプション設定（ポイント表示・範囲・色など）がそのまま反映されています。</p>
+                        <p id="code-helper-desc" class="text-xs text-slate-500">コピー先で項目を非表示にした場合も、残りの項目だけで自動的に100%へ再計算されます。</p>
                     </div>
                     <button onclick="copyGeneratedCode()" id="copy-btn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition shadow-sm active:scale-95 flex items-center gap-1.5">
                         <span>コードをコピーする</span>
@@ -156,7 +158,7 @@
         // カラーパレット
         const PALETTE = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#06b6d4', '#8b5cf6'];
 
-        // デフォルトの複数系列リスト
+        // デフォルトの19項目プリセットリスト
         const DEFAULT_SERIES_PRESETS = [
             { name: '道州制ふぁん', color: '#ff6c00' },
             { name: '大阪都ふぁん', color: '#4969e1' },
@@ -218,10 +220,10 @@
             const container = document.getElementById('series-inputs-container');
             container.innerHTML = '';
 
-            seriesList.forEach((series, index) => {
+            seriesList.forEach((series) => {
                 const card = document.createElement('div');
                 card.className = `bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col gap-2 transition ${series.enabled ? '' : 'opacity-60'}`;
-                
+
                 const colorDots = PALETTE.map(c => `
                     <button type="button" onclick="changeSeriesColor(${series.id}, '${c}')"
                         class="w-4 h-4 rounded-full transition ${series.color === c ? 'ring-2 ring-offset-1 ring-slate-600 scale-110' : 'opacity-70 hover:opacity-100'}"
@@ -229,7 +231,7 @@
                 `).join('');
 
                 const removeBtn = seriesList.length > 1
-                    ? `<button type="button" onclick="removeSeries(${series.id})" class="text-xs text-rose-500 hover:text-rose-700 font-bold px-1.5 py-0.5 rounded hover:bg-rose-50 transition" title="この線を削除">✕ 削除</button>`
+                    ? `<button type="button" onclick="removeSeries(${series.id})" class="text-xs text-rose-500 hover:text-rose-700 font-bold px-1.5 py-0.5 rounded hover:bg-rose-50 transition" title="この項目を削除">✕ 削除</button>`
                     : '';
 
                 card.innerHTML = `
@@ -246,7 +248,7 @@
                             <span id="series-dot-${series.id}" class="w-3 h-3 rounded-full shrink-0" style="background-color: ${series.color};"></span>
                             <input type="text" value="${series.name}" oninput="updateSeriesName(${series.id}, this.value)"
                                 class="bg-white border border-slate-300 rounded-md px-2 py-0.5 text-xs font-bold text-slate-700 w-full focus:outline-none focus:border-indigo-500"
-                                placeholder="線の名前">
+                                placeholder="項目名">
                         </div>
                     </div>
                     <div class="flex items-center justify-between gap-2 flex-wrap">
@@ -270,46 +272,52 @@
             });
         }
 
-        // サンプルデータのセット（1本 または 複数本）
+        // サンプルデータのセット（19項目プリセット または デモデータ）
         function setSampleData(type) {
-            if (type === 'single') {
-                seriesList = [
-                    {
-                        id: 1,
-                        name: 'データA',
-                        color: PALETTE[0],
-                        enabled: true,
-                        rawText: "35\n58\n42\n78\n65\n92",
-                        values: [35, 58, 42, 78, 65, 92]
-                    }
-                ];
-                nextSeriesId = 2;
+            if (type === 'preset') {
+                seriesList = DEFAULT_SERIES_PRESETS.map((item, idx) => ({
+                    id: idx + 1,
+                    name: item.name,
+                    color: item.color,
+                    enabled: true,
+                    rawText: '',
+                    values: []
+                }));
+                nextSeriesId = seriesList.length + 1;
             } else {
                 seriesList = [
                     {
                         id: 1,
-                        name: '今年',
-                        color: PALETTE[0],
+                        name: '空想鉄道',
+                        color: '#0070c0',
                         enabled: true,
-                        rawText: "45\n62\n58\n85\n79\n96",
-                        values: [45, 62, 58, 85, 79, 96]
+                        rawText: "450\n480\n520\n600\n580\n640",
+                        values: [450, 480, 520, 600, 580, 640]
                     },
                     {
                         id: 2,
-                        name: '昨年',
-                        color: PALETTE[1],
+                        name: '空想地図',
+                        color: '#ff9900',
                         enabled: true,
-                        rawText: "30\n40\n38\n55\n60\n72",
-                        values: [30, 40, 38, 55, 60, 72]
+                        rawText: "300\n320\n310\n290\n350\n380",
+                        values: [300, 320, 310, 290, 350, 380]
+                    },
+                    {
+                        id: 3,
+                        name: '空想道路',
+                        color: '#00994e',
+                        enabled: true,
+                        rawText: "150\n180\n220\n250\n270\n300",
+                        values: [150, 180, 220, 250, 270, 300]
                     }
                 ];
-                nextSeriesId = 3;
+                nextSeriesId = 4;
             }
             renderSeriesInputs();
             updateAllCharts();
         }
 
-        // 新しい線（系列）を追加
+        // 新しい項目（系列）を追加
         function addSeries() {
             const color = PALETTE[(nextSeriesId - 1) % PALETTE.length];
             const baseLen = getMaxDataLength() || 6;
@@ -318,7 +326,7 @@
 
             seriesList.push({
                 id: nextSeriesId,
-                name: `データ${String.fromCharCode(64 + nextSeriesId)}`,
+                name: `項目${nextSeriesId}`,
                 color: color,
                 enabled: true,
                 rawText: rawText,
@@ -382,7 +390,6 @@
             if (val && !val.startsWith('#')) {
                 val = '#' + val;
             }
-            // 有効な6桁または3桁のHEXカラーコードか判定
             if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
                 const target = seriesList.find(s => s.id === id);
                 if (target) {
@@ -431,35 +438,57 @@
             updateAllCharts();
         }
 
-        // Y軸の上限・下限設定を取得（空欄ならundefined）
-        function getYBounds() {
-            const minRaw = document.getElementById('y-min')?.value.trim();
-            const maxRaw = document.getElementById('y-max')?.value.trim();
-            const minVal = (minRaw !== '' && !isNaN(parseFloat(minRaw))) ? parseFloat(minRaw) : undefined;
-            const maxVal = (maxRaw !== '' && !isNaN(parseFloat(maxRaw))) ? parseFloat(maxRaw) : undefined;
-            return { min: minVal, max: maxVal };
-        }
-
-        // Y軸の上限・下限をリセット（自動）
-        function resetYBounds() {
-            document.getElementById('y-min').value = '';
-            document.getElementById('y-max').value = '';
-            updateAllCharts();
-        }
-
-        // 範囲に応じた連番ラベル配列を生成（例: 7〜19なら ['7', '8', ..., '19']）
+        // 範囲に応じた連番ラベル配列を生成
         function getSequenceLabels() {
             const { start, end } = getSliceRange();
             const count = Math.max(end - start + 1, 1);
             return Array.from({ length: count }, (_, i) => `${start + i}`);
         }
 
-        // 指定範囲で切り出した有効な各系列データを取得
-        function getSlicedSeriesList() {
+        // Y軸の上限・下限設定を取得
+        function getYBounds(isLineMode = false) {
+            const minRaw = document.getElementById('y-min')?.value.trim();
+            const maxRaw = document.getElementById('y-max')?.value.trim();
+            const defaultMin = isLineMode ? undefined : 0;
+            const defaultMax = isLineMode ? undefined : 100;
+            const minVal = (minRaw !== '' && !isNaN(parseFloat(minRaw))) ? parseFloat(minRaw) : defaultMin;
+            const maxVal = (maxRaw !== '' && !isNaN(parseFloat(maxRaw))) ? parseFloat(maxRaw) : defaultMax;
+            return { min: minVal, max: maxVal };
+        }
+
+        // Y軸の上限・下限をリセット
+        function resetYBounds() {
+            document.getElementById('y-min').value = '';
+            document.getElementById('y-max').value = '';
+            updateAllCharts();
+        }
+
+        // 各時点の合計を100%とした割合データ配列（％と元の実数値）を計算
+        function getPercentageSeriesList() {
             const { start, end } = getSliceRange();
-            return getEnabledSeriesList().map(s => ({
-                ...s,
-                values: s.values.slice(start - 1, end)
+            const count = Math.max(end - start + 1, 1);
+            const active = getEnabledSeriesList();
+
+            const slicedItems = active.map(s => {
+                const slice = [];
+                for (let i = start - 1; i < end; i++) {
+                    slice.push(s.values[i] !== undefined ? s.values[i] : 0);
+                }
+                return {
+                    ...s,
+                    rawValues: slice
+                };
+            });
+
+            const totals = Array.from({ length: count }, (_, idx) =>
+                slicedItems.reduce((sum, item) => sum + item.rawValues[idx], 0)
+            );
+
+            return slicedItems.map(item => ({
+                ...item,
+                percentValues: item.rawValues.map((val, idx) =>
+                    totals[idx] > 0 ? Number(((val / totals[idx]) * 100).toFixed(2)) : 0
+                )
             }));
         }
 
@@ -483,16 +512,32 @@
                     },
                     scales: {
                         y: {
-                            beginAtZero: true,
-                            grid: { color: '#f1f5f9' }
+                            stacked: true,
+                            min: 0,
+                            max: 100,
+                            grid: { color: '#f1f5f9' },
+                            ticks: {
+                                callback: function(value) { return value + '%'; }
+                            }
                         },
                         x: {
+                            stacked: true,
                             grid: { display: false }
                         }
                     },
                     plugins: {
                         legend: {
                             display: seriesList.length > 1
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const ds = context.dataset;
+                                    const pct = context.parsed.y;
+                                    const raw = ds.rawValues ? ds.rawValues[context.dataIndex] : '';
+                                    return `${ds.label}: ${pct}% (${raw})`;
+                                }
+                            }
                         }
                     }
                 }
@@ -501,38 +546,104 @@
 
         function updateChartJs() {
             if (!chartJsInstance) return;
+            const chartType = document.getElementById('opt-chart-type').value;
             const isSmooth = document.getElementById('opt-smooth').checked;
             const isFill = document.getElementById('opt-fill').checked;
             const showPoints = document.getElementById('opt-points').checked;
-            const slicedList = getSlicedSeriesList();
-            const yBounds = getYBounds();
+            const isLineMode = chartType === 'line';
+            const yBounds = getYBounds(isLineMode);
 
+            // モードに応じたUI表示の切り替え
+            document.getElementById('smooth-wrapper').classList.toggle('hidden', chartType === 'bar');
+            document.getElementById('fill-wrapper').classList.toggle('hidden', !isLineMode);
+            document.getElementById('points-wrapper').classList.toggle('hidden', chartType === 'bar');
+            document.getElementById('ybounds-label').textContent = isLineMode ? '値の範囲:' : '割合の範囲(%):';
+            document.getElementById('y-min').placeholder = isLineMode ? '下限(自動)' : '0';
+            document.getElementById('y-max').placeholder = isLineMode ? '上限(自動)' : '100';
+            document.getElementById('ybounds-reset-btn').textContent = isLineMode ? '自動' : '0〜100%';
+
+            if (isLineMode) {
+                document.getElementById('preview-title').textContent = '折れ線グラフ（実数値比較）';
+                document.getElementById('preview-desc').textContent = '入力された実数値のまま、各系列の推移を比較します。';
+                document.getElementById('code-helper-desc').textContent = 'コピー先でも表示範囲や各線の表示・非表示を切り替えられます。';
+            } else {
+                document.getElementById('preview-title').textContent = '100% 構成比（占有率）グラフ';
+                document.getElementById('preview-desc').textContent = 'カーソルを合わせると、各項目の「割合（％）」と「元の数値」の両方がポップアップで表示されます。';
+                document.getElementById('code-helper-desc').textContent = 'コピー先で項目を非表示にした場合も、残りの項目だけで自動的に100%へ再計算されます。';
+            }
+
+            chartJsInstance.config.type = chartType === 'bar' ? 'bar' : 'line';
             chartJsInstance.data.labels = getSequenceLabels();
-            chartJsInstance.data.datasets = slicedList.map(s => ({
-                label: s.name,
-                data: s.values,
-                borderColor: s.color,
-                backgroundColor: s.color + '20',
-                borderWidth: 2.5,
-                pointBackgroundColor: '#ffffff',
-                pointBorderColor: s.color,
-                pointBorderWidth: showPoints ? 2.5 : 0,
-                pointRadius: showPoints ? 4 : 0,
-                pointHoverRadius: 5,
-                fill: isFill,
-                tension: isSmooth ? 0.4 : 0
-            }));
-            chartJsInstance.options.scales.y.min = yBounds.min;
-            chartJsInstance.options.scales.y.max = yBounds.max;
-            chartJsInstance.options.scales.y.beginAtZero = (yBounds.min === undefined);
-            chartJsInstance.options.plugins.legend.display = slicedList.length > 1;
+
+            if (isLineMode) {
+                const { start, end } = getSliceRange();
+                const active = getEnabledSeriesList();
+                chartJsInstance.data.datasets = active.map(s => ({
+                    label: s.name,
+                    data: s.values.slice(start - 1, end),
+                    borderColor: s.color,
+                    backgroundColor: s.color + '20',
+                    borderWidth: 2.5,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: s.color,
+                    pointBorderWidth: showPoints ? 2.5 : 0,
+                    pointRadius: showPoints ? 4 : 0,
+                    pointHoverRadius: 5,
+                    fill: isFill,
+                    tension: isSmooth ? 0.4 : 0
+                }));
+
+                chartJsInstance.options.scales.x.stacked = false;
+                chartJsInstance.options.scales.y.stacked = false;
+                chartJsInstance.options.scales.y.min = yBounds.min;
+                chartJsInstance.options.scales.y.max = yBounds.max;
+                chartJsInstance.options.scales.y.beginAtZero = (yBounds.min === undefined);
+                chartJsInstance.options.scales.y.ticks.callback = function(value) { return value; };
+                chartJsInstance.options.plugins.tooltip.callbacks.label = function(context) {
+                    return `${context.dataset.label}: ${context.parsed.y}`;
+                };
+            } else {
+                const pctList = getPercentageSeriesList();
+                chartJsInstance.data.datasets = pctList.map(s => ({
+                    label: s.name,
+                    data: s.percentValues,
+                    rawValues: s.rawValues,
+                    borderColor: s.color,
+                    backgroundColor: chartType === 'bar' ? s.color + 'd9' : s.color + 'cc',
+                    borderWidth: chartType === 'bar' ? 1 : 1.5,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: s.color,
+                    pointBorderWidth: showPoints ? 2 : 0,
+                    pointRadius: showPoints ? 3.5 : 0,
+                    pointHoverRadius: 5,
+                    fill: chartType === 'area' ? 'stack' : false,
+                    tension: isSmooth ? 0.35 : 0
+                }));
+
+                chartJsInstance.options.scales.x.stacked = true;
+                chartJsInstance.options.scales.y.stacked = true;
+                chartJsInstance.options.scales.y.min = yBounds.min;
+                chartJsInstance.options.scales.y.max = yBounds.max;
+                chartJsInstance.options.scales.y.beginAtZero = false;
+                chartJsInstance.options.scales.y.ticks.callback = function(value) { return value + '%'; };
+                chartJsInstance.options.plugins.tooltip.callbacks.label = function(context) {
+                    const ds = context.dataset;
+                    const pct = context.parsed.y;
+                    const raw = ds.rawValues ? ds.rawValues[context.dataIndex] : '';
+                    return `${ds.label}: ${pct}% (${raw})`;
+                };
+            }
+
+            chartJsInstance.options.plugins.legend.display = chartJsInstance.data.datasets.length > 1;
             chartJsInstance.update();
         }
 
         // -----------------------------------------
-        // 2. コピペ用HTMLコードの生成（閲覧専用の表示範囲・系列切り替え付き）
+        // 2. コピペ用HTMLコードの生成
         // -----------------------------------------
         function updateGeneratedCode() {
+            const chartType = document.getElementById('opt-chart-type').value;
+            const isLineMode = chartType === 'line';
             const isSmooth = document.getElementById('opt-smooth').checked;
             const isFill = document.getElementById('opt-fill').checked;
             const showPoints = document.getElementById('opt-points').checked;
@@ -542,18 +653,11 @@
             const totalLen = getMaxDataLength();
             const initStartVal = document.getElementById('range-start')?.value || '';
             const initEndVal = document.getElementById('range-end')?.value || '';
-            const yBounds = getYBounds();
+            const yBounds = getYBounds(isLineMode);
             const allowCopyYBounds = document.getElementById('opt-copy-ybounds')?.checked ?? true;
             const initYMinVal = document.getElementById('y-min')?.value || '';
             const initYMaxVal = document.getElementById('y-max')?.value || '';
 
-            const yScaleOptions = {
-                beginAtZero: yBounds.min === undefined
-            };
-            if (yBounds.min !== undefined) yScaleOptions.min = yBounds.min;
-            if (yBounds.max !== undefined) yScaleOptions.max = yBounds.max;
-
-            // 有効（グラフに含めるチェックがON）なデータのみを埋め込む
             const fullSeriesData = enabledSeries.map(s => ({
                 name: s.name,
                 color: s.color,
@@ -562,11 +666,11 @@
 
             const yBoundsControlHtml = allowCopyYBounds ? `
   <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; color: #334155;">
-    <strong>値の範囲:</strong>
-    <input type="number" id="viewYMin" step="any" value="${initYMinVal}" placeholder="下限(自動)" style="width: 80px; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
+    <strong>${isLineMode ? '値の範囲:' : '割合の範囲(%):'}</strong>
+    <input type="number" id="viewYMin" step="any" value="${initYMinVal}" placeholder="${isLineMode ? '下限(自動)' : '0'}" style="width: 80px; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
     <span>〜</span>
-    <input type="number" id="viewYMax" step="any" value="${initYMaxVal}" placeholder="上限(自動)" style="width: 80px; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
-    <button type="button" id="viewYReset" style="margin-left: 4px; padding: 4px 10px; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; cursor: pointer;">自動</button>
+    <input type="number" id="viewYMax" step="any" value="${initYMaxVal}" placeholder="${isLineMode ? '上限(自動)' : '100'}" style="width: 80px; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
+    <button type="button" id="viewYReset" style="margin-left: 4px; padding: 4px 10px; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; cursor: pointer;">${isLineMode ? '自動' : '0〜100%'}</button>
   </div>` : '';
 
             const yBoundsControlJs = allowCopyYBounds ? `
@@ -577,11 +681,13 @@
   function updateYBounds() {
     const minRaw = yMinEl.value.trim();
     const maxRaw = yMaxEl.value.trim();
-    const minVal = (minRaw !== '' && !isNaN(parseFloat(minRaw))) ? parseFloat(minRaw) : undefined;
-    const maxVal = (maxRaw !== '' && !isNaN(parseFloat(maxRaw))) ? parseFloat(maxRaw) : undefined;
+    const defMin = ${isLineMode ? 'undefined' : '0'};
+    const defMax = ${isLineMode ? 'undefined' : '100'};
+    const minVal = (minRaw !== '' && !isNaN(parseFloat(minRaw))) ? parseFloat(minRaw) : defMin;
+    const maxVal = (maxRaw !== '' && !isNaN(parseFloat(maxRaw))) ? parseFloat(maxRaw) : defMax;
     chart.options.scales.y.min = minVal;
     chart.options.scales.y.max = maxVal;
-    chart.options.scales.y.beginAtZero = (minVal === undefined);
+    ${isLineMode ? 'chart.options.scales.y.beginAtZero = (minVal === undefined);' : ''}
     chart.update();
   }
 
@@ -593,11 +699,16 @@
     updateYBounds();
   });` : '';
 
-            codeBox.value = `<!-- Chart.jsの読み込み（head内などに1回記述） -->
+            if (isLineMode) {
+                const yScaleOptions = { beginAtZero: yBounds.min === undefined };
+                if (yBounds.min !== undefined) yScaleOptions.min = yBounds.min;
+                if (yBounds.max !== undefined) yScaleOptions.max = yBounds.max;
+
+                codeBox.value = `<!-- Chart.jsの読み込み -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"><\/script>
 
-<!-- 閲覧用グラフ＆範囲指定・系列表示切り替えコントロール -->
-<div style="width: 100%; max-width: 640px; font-family: sans-serif;">
+<!-- 閲覧用 折れ線グラフ -->
+<div style="width: 100%; max-width: 680px; font-family: sans-serif;">
   <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; color: #334155;">
     <strong>表示範囲:</strong>
     <input type="number" id="viewRangeStart" min="1" max="${totalLen}" value="${initStartVal}" placeholder="1" style="width: 60px; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
@@ -607,8 +718,8 @@
     <button type="button" id="viewRangeReset" style="margin-left: 4px; padding: 4px 10px; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; cursor: pointer;">全範囲</button>
   </div>${yBoundsControlHtml}
   <div id="viewSeriesToggles" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"></div>
-  <div style="width: 100%; height: 320px;">
-    <canvas id="myLineChart"></canvas>
+  <div style="width: 100%; height: 340px;">
+    <canvas id="myCustomChart"></canvas>
   </div>
 </div>
 
@@ -634,7 +745,7 @@
     togglesEl.style.display = 'none';
   }
 
-  function getSliced() {
+  function buildData() {
     let s = parseInt(startEl.value, 10);
     let e = parseInt(endEl.value, 10);
     s = (!isNaN(s) && s >= 1) ? Math.min(s, totalLen) : 1;
@@ -661,24 +772,20 @@
     return { labels, datasets };
   }
 
-  const initData = getSliced();
-  const chart = new Chart(document.getElementById('myLineChart'), {
+  const chart = new Chart(document.getElementById('myCustomChart'), {
     type: 'line',
-    data: initData,
+    data: buildData(),
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      interaction: {
-        mode: 'index',
-        intersect: false
-      },
+      interaction: { mode: 'index', intersect: false },
       scales: { y: ${JSON.stringify(yScaleOptions)} },
       plugins: { legend: { display: false } }
     }
   });
 
   function updateView() {
-    const next = getSliced();
+    const next = buildData();
     chart.data.labels = next.labels;
     chart.data.datasets = next.datasets;
     chart.update();
@@ -702,6 +809,149 @@
   });${yBoundsControlJs}
 })();
 <\/script>`;
+            } else {
+                const initYMin = yBounds.min !== undefined ? yBounds.min : 0;
+                const initYMax = yBounds.max !== undefined ? yBounds.max : 100;
+
+                codeBox.value = `<!-- Chart.jsの読み込み -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"><\/script>
+
+<!-- 閲覧用 100%構成比グラフ -->
+<div style="width: 100%; max-width: 680px; font-family: sans-serif;">
+  <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; color: #334155;">
+    <strong>表示範囲:</strong>
+    <input type="number" id="viewRangeStart" min="1" max="${totalLen}" value="${initStartVal}" placeholder="1" style="width: 60px; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
+    <span>〜</span>
+    <input type="number" id="viewRangeEnd" min="1" max="${totalLen}" value="${initEndVal}" placeholder="最後" style="width: 60px; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
+    <span>番目</span>
+    <button type="button" id="viewRangeReset" style="margin-left: 4px; padding: 4px 10px; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; cursor: pointer;">全範囲</button>
+  </div>${yBoundsControlHtml}
+  <div id="viewSeriesToggles" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"></div>
+  <div style="width: 100%; height: 340px;">
+    <canvas id="myPercentageChart"></canvas>
+  </div>
+</div>
+
+<script>
+(function() {
+  const rawSeries = ${JSON.stringify(fullSeriesData)};
+  const visibility = rawSeries.map(() => true);
+  const totalLen = Math.max(...rawSeries.map(s => s.values.length), 1);
+  const startEl = document.getElementById('viewRangeStart');
+  const endEl = document.getElementById('viewRangeEnd');
+  const resetEl = document.getElementById('viewRangeReset');
+  const togglesEl = document.getElementById('viewSeriesToggles');
+
+  if (rawSeries.length > 1) {
+    togglesEl.innerHTML = rawSeries.map((s, idx) =>
+      '<label style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#fff;border:1px solid #cbd5e1;border-radius:9999px;font-size:12px;font-weight:bold;color:#334155;cursor:pointer;user-select:none;">' +
+        '<input type="checkbox" data-idx="' + idx + '" checked style="accent-color:' + s.color + ';cursor:pointer;">' +
+        '<span style="width:10px;height:10px;border-radius:9999px;background:' + s.color + ';display:inline-block;"></span>' +
+        '<span>' + s.name + '</span>' +
+      '</label>'
+    ).join('');
+  } else {
+    togglesEl.style.display = 'none';
+  }
+
+  function buildPercentageData() {
+    let s = parseInt(startEl.value, 10);
+    let e = parseInt(endEl.value, 10);
+    s = (!isNaN(s) && s >= 1) ? Math.min(s, totalLen) : 1;
+    e = (!isNaN(e) && e >= 1) ? Math.min(e, totalLen) : totalLen;
+    if (e < s) e = s;
+    const count = e - s + 1;
+    const labels = Array.from({ length: count }, (_, i) => String(s + i));
+    const visibleItems = rawSeries
+      .map((item, idx) => ({ item, idx }))
+      .filter(({ idx }) => visibility[idx])
+      .map(({ item }) => {
+        const slice = [];
+        for (let i = s - 1; i < e; i++) {
+          slice.push(item.values[i] !== undefined ? item.values[i] : 0);
+        }
+        return { ...item, rawValues: slice };
+      });
+
+    const totals = Array.from({ length: count }, (_, idx) =>
+      visibleItems.reduce((sum, item) => sum + item.rawValues[idx], 0)
+    );
+
+    const datasets = visibleItems.map(item => ({
+      label: item.name,
+      data: item.rawValues.map((v, idx) => totals[idx] > 0 ? Number(((v / totals[idx]) * 100).toFixed(2)) : 0),
+      rawValues: item.rawValues,
+      borderColor: item.color,
+      backgroundColor: ${chartType === 'bar' ? "item.color + 'd9'" : "item.color + 'cc'"},
+      borderWidth: ${chartType === 'bar' ? 1 : 1.5},
+      pointBackgroundColor: '#ffffff',
+      pointBorderColor: item.color,
+      pointBorderWidth: ${showPoints ? 2 : 0},
+      pointRadius: ${showPoints ? 3.5 : 0},
+      pointHoverRadius: 5,
+      fill: ${chartType === 'area' ? "'stack'" : 'false'},
+      tension: ${isSmooth ? 0.35 : 0}
+    }));
+
+    return { labels, datasets };
+  }
+
+  const chart = new Chart(document.getElementById('myPercentageChart'), {
+    type: '${chartType === 'bar' ? 'bar' : 'line'}',
+    data: buildPercentageData(),
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      scales: {
+        x: { stacked: true },
+        y: {
+          stacked: true,
+          min: ${initYMin},
+          max: ${initYMax},
+          ticks: { callback: function(v) { return v + '%'; } }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              const raw = ctx.dataset.rawValues ? ctx.dataset.rawValues[ctx.dataIndex] : '';
+              return ctx.dataset.label + ': ' + ctx.parsed.y + '% (' + raw + ')';
+            }
+          }
+        }
+      }
+    }
+  });
+
+  function updateView() {
+    const next = buildPercentageData();
+    chart.data.labels = next.labels;
+    chart.data.datasets = next.datasets;
+    chart.update();
+  }
+
+  togglesEl.addEventListener('change', (e) => {
+    if (e.target && e.target.dataset.idx !== undefined) {
+      const idx = parseInt(e.target.dataset.idx, 10);
+      visibility[idx] = e.target.checked;
+      e.target.parentElement.style.opacity = e.target.checked ? '1' : '0.45';
+      updateView();
+    }
+  });
+
+  startEl.addEventListener('input', updateView);
+  endEl.addEventListener('input', updateView);
+  resetEl.addEventListener('click', () => {
+    startEl.value = '';
+    endEl.value = '';
+    updateView();
+  });${yBoundsControlJs}
+})();
+<\/script>`;
+            }
         }
 
         // コードをクリップボードにコピー
