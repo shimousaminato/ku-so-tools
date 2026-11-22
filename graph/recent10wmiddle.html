@@ -1,0 +1,110 @@
+<!-- Chart.jsの読み込み（head内などに1回記述） -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- 閲覧用グラフ＆範囲指定・系列表示切り替えコントロール -->
+<a href="https://shimousaminato.github.io/ku-so-tools/graph/index.html">&gt;&gt;戻る</a><br>
+<div style="width: 100%; max-width: 640px; font-family: sans-serif;">
+  <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; color: #334155;">
+    <strong>表示範囲:</strong>
+    <input type="number" id="viewRangeStart" min="1" max="10" value="" placeholder="1" style="width: 60px; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
+    <span>〜</span>
+    <input type="number" id="viewRangeEnd" min="1" max="10" value="" placeholder="最後" style="width: 60px; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
+    <span>番目</span>
+    <button type="button" id="viewRangeReset" style="margin-left: 4px; padding: 4px 10px; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; cursor: pointer;">全範囲</button>
+  </div>
+  <div id="viewSeriesToggles" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"></div>
+  <div style="width: 100%; height: 320px;">
+    <canvas id="myLineChart"></canvas>
+  </div>
+</div>
+
+<script>
+(function() {
+  const rawSeries = [{"name":"空想道路","color":"#00994e","values":[142,164,152,127,140,119,150,97,93,39]},{"name":"空想地図","color":"#ff9900","values":[218,305,227,233,220,229,249,291,235,150]},{"name":"空想路線図","color":"#b41c04","values":[196,235,163,187,230,196,172,222,220,151]},{"name":"空想図画","color":"#800e80","values":[169,286,204,169,255,145,171,208,169,178]},{"name":"空想文章","color":"#113311","values":[289,391,603,489,515,378,368,391,206,248]},{"name":"空想別館","color":"#1f2f54","values":[105,105,105,105,105,105,105,105,105,104]},{"name":"時くら","color":"#666666","values":[115,144,120,93,51,83,119,79,44,48]},{"name":"点くら","color":"#008080","values":[52,47,116,120,44,71,46,55,27,16]},{"name":"問くら","color":"#3949ab","values":[244,358,252,188,202,187,157,162,159,180]},{"name":"閑くら","color":"#c53258","values":[0,206,108,53,60,16,17,70,85,93]},{"name":"経くら","color":"#e6aa0e","values":[0,0,0,0,802,181,89,75,58,19]}];
+  const visibility = rawSeries.map(() => true);
+  const totalLen = Math.max(...rawSeries.map(s => s.values.length), 1);
+  const startEl = document.getElementById('viewRangeStart');
+  const endEl = document.getElementById('viewRangeEnd');
+  const resetEl = document.getElementById('viewRangeReset');
+  const togglesEl = document.getElementById('viewSeriesToggles');
+
+  if (rawSeries.length > 1) {
+    togglesEl.innerHTML = rawSeries.map((s, idx) =>
+      '<label style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#fff;border:1px solid #cbd5e1;border-radius:9999px;font-size:12px;font-weight:bold;color:#334155;cursor:pointer;user-select:none;">' +
+        '<input type="checkbox" data-idx="' + idx + '" checked style="accent-color:' + s.color + ';cursor:pointer;">' +
+        '<span style="width:10px;height:10px;border-radius:9999px;background:' + s.color + ';display:inline-block;"></span>' +
+        '<span>' + s.name + '</span>' +
+      '</label>'
+    ).join('');
+  } else {
+    togglesEl.style.display = 'none';
+  }
+
+  function getSliced() {
+    let s = parseInt(startEl.value, 10);
+    let e = parseInt(endEl.value, 10);
+    s = (!isNaN(s) && s >= 1) ? Math.min(s, totalLen) : 1;
+    e = (!isNaN(e) && e >= 1) ? Math.min(e, totalLen) : totalLen;
+    if (e < s) e = s;
+    const labels = Array.from({ length: e - s + 1 }, (_, i) => String(s + i));
+    const datasets = rawSeries
+      .map((item, idx) => ({ item, idx }))
+      .filter(({ idx }) => visibility[idx])
+      .map(({ item }) => ({
+        label: item.name,
+        data: item.values.slice(s - 1, e),
+        borderColor: item.color,
+        backgroundColor: item.color + '20',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#ffffff',
+        pointBorderColor: item.color,
+        pointBorderWidth: 2.5,
+        pointRadius: 4,
+        pointHoverRadius: 5,
+        fill: false,
+        tension: 0.4
+      }));
+    return { labels, datasets };
+  }
+
+  const initData = getSliced();
+  const chart = new Chart(document.getElementById('myLineChart'), {
+    type: 'line',
+    data: initData,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        mode: 'index',
+        intersect: false
+      },
+      scales: { y: {"beginAtZero":false,"min":100,"max":810} },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  function updateView() {
+    const next = getSliced();
+    chart.data.labels = next.labels;
+    chart.data.datasets = next.datasets;
+    chart.update();
+  }
+
+  togglesEl.addEventListener('change', (e) => {
+    if (e.target && e.target.dataset.idx !== undefined) {
+      const idx = parseInt(e.target.dataset.idx, 10);
+      visibility[idx] = e.target.checked;
+      e.target.parentElement.style.opacity = e.target.checked ? '1' : '0.45';
+      updateView();
+    }
+  });
+
+  startEl.addEventListener('input', updateView);
+  endEl.addEventListener('input', updateView);
+  resetEl.addEventListener('click', () => {
+    startEl.value = '';
+    endEl.value = '';
+    updateView();
+  });
+})();
+</script>
