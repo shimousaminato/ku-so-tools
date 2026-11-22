@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
+<html lang="ja"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>作品投稿数グラフ</title>
+  <title>作品投稿数グラフ | Ku-So Tools</title>
   <style>
     :root {
       --bg-color: #f4f6f9;
@@ -162,11 +160,24 @@
       }
     }
   </style>
-</head>
+<style id="country-flag-fixer-ext-head">@font-face {
+        font-family: "Twemoji Country Flags";
+        font-style: normal;
+        font-weight: 100 900;
+        src: url("chrome-extension://jhcpefjbhmbkgjgipkhndplfbhdecijh/fonts/TwemojiCountryFlags.woff2") format("woff2");
+        unicode-range: U+1F1E6-1F1FF,U+1F3F4,U+E0062-E0063,U+E0065,U+E0067,U+E006C,U+E006E,U+E0073-E0074,U+E0077,U+E007F;
+      }
+@font-face {
+        font-family: "Twemoji Country Flags";
+        font-style: italic;
+        font-weight: 100 900;
+        src: url("chrome-extension://jhcpefjbhmbkgjgipkhndplfbhdecijh/fonts/TwemojiCountryFlags.woff2") format("woff2");
+        unicode-range: U+1F1E6-1F1FF,U+1F3F4,U+E0062-E0063,U+E0065,U+E0067,U+E006C,U+E006E,U+E0073-E0074,U+E0077,U+E007F;
+      }</style></head>
 <body>
   <div class="container">
     <header>
-      <h1>作品数グラフ</h1>
+      <h1>Ku-So Tools Graph Dashboard</h1>
       <p>作品投稿数グラフ一覧（全期間・直近10週間）</p>
     </header>
 
@@ -179,9 +190,26 @@
         <div class="card-grid">
           <a class="card" href="https://shimousaminato.github.io/ku-so-tools/graph/allmajor.html">
             <div class="card-top">
-              <span class="card-title">全期間</span>
+              <span class="card-title">全期間-10万以上サイト</span>
               <span class="card-arrow">→</span>
             </div>
+            <div class="card-meta">累計投稿数 100,000以上</div>
+          </a>
+
+          <a class="card" href="https://shimousaminato.github.io/ku-so-tools/graph/allmidium.html">
+            <div class="card-top">
+              <span class="card-title">全期間-1万以上サイト</span>
+              <span class="card-arrow">→</span>
+            </div>
+            <div class="card-meta">累計投稿数 10,000以上</div>
+          </a>
+
+          <a class="card" href="https://shimousaminato.github.io/ku-so-tools/graph/allminor.html">
+            <div class="card-top">
+              <span class="card-title">全期間-1万未満サイト</span>
+              <span class="card-arrow">→</span>
+            </div>
+            <div class="card-meta">累計投稿数 10,000未満</div>
           </a>
         </div>
       </section>
@@ -194,13 +222,35 @@
         <div class="card-grid">
           <a class="card" href="https://shimousaminato.github.io/ku-so-tools/graph/recent10wmajor.html">
             <div class="card-top">
-              <span class="card-title">直近10週</span>
+              <span class="card-title">直近10週-1000以上サイト</span>
               <span class="card-arrow">→</span>
             </div>
+            <div class="card-meta">週間投稿数 1,000以上</div>
+          </a>
+
+          <a class="card" href="https://shimousaminato.github.io/ku-so-tools/graph/recent10wmidium.html">
+            <div class="card-top">
+              <span class="card-title">直近10週-100以上サイト</span>
+              <span class="card-arrow">→</span>
+            </div>
+            <div class="card-meta">週間投稿数 100以上</div>
+          </a>
+
+          <a class="card" href="https://shimousaminato.github.io/ku-so-tools/graph/recent10wminor.html">
+            <div class="card-top">
+              <span class="card-title">直近10週-100未満サイト</span>
+              <span class="card-arrow">→</span>
+            </div>
+            <div class="card-meta">週間投稿数 100未満</div>
           </a>
         </div>
       </section>
     </main>
+
+    <footer>
+      Ku-So Tools Graph Index
+    </footer>
   </div>
-</body>
-</html>
+
+
+</body></html>
