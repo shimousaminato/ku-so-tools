@@ -1,0 +1,137 @@
+<!-- Chart.jsの読み込み -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- 閲覧用 折れ線グラフ -->
+<a href="https://shimousaminato.github.io/ku-so-tools/graph/index.html">>>戻る</a><br>
+<div style="width: 100%; max-width: 680px; font-family: sans-serif;">
+  <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; color: #334155;">
+    <strong>表示範囲:</strong>
+    <input type="number" id="viewRangeStart" min="1" max="923" value="" placeholder="1" style="width: 60px; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
+    <span>〜</span>
+    <input type="number" id="viewRangeEnd" min="1" max="923" value="" placeholder="最後" style="width: 60px; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
+    <span>番目</span>
+    <button type="button" id="viewRangeReset" style="margin-left: 4px; padding: 4px 10px; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; cursor: pointer;">全範囲</button>
+  </div>
+  <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; color: #334155;">
+    <strong>値の範囲:</strong>
+    <input type="number" id="viewYMin" step="any" value="" placeholder="下限(自動)" style="width: 80px; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
+    <span>〜</span>
+    <input type="number" id="viewYMax" step="any" value="" placeholder="上限(自動)" style="width: 80px; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
+    <button type="button" id="viewYReset" style="margin-left: 4px; padding: 4px 10px; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; cursor: pointer;">自動</button>
+  </div>
+  <div id="viewSeriesToggles" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"></div>
+  <div style="width: 100%; height: 340px;">
+    <canvas id="myCustomChart"></canvas>
+  </div>
+</div>
+
+<script>
+(function() {
+  const rawSeries = [{"name":"道州制ふぁん","color":"#ff6c00","values":[19,1,2,1,0,9,2,0,0,1,8,15,9,6,31,62,30,36,70,92,55,22,17,26,8,17,7,10,12,12,3,11,9,10,9,8,25,11,14,11,8,4,4,5,10,8,10,18,22,17,24,26,19,17,8,42,36,13,23,34,31,18,15,9,10,8,24,12,16,13,5,16,20,19,6,11,7,11,1,4,5,5,5,4,6,6,1,6,6,1,4,9,19,21,14,11,29,23,32,32,31,10,4,12,8,25,11,16,23,14,15,10,8,2,15,4,11,19,9,0,0,18,3,14,15,21,62,0,20,17,23,27,21,48,28,57,54,11,20,12,22,16,10,22,15,55,39,25,20,19,10,41,58,42,32,22,35,34,27,17,17,31,34,47,18,41,22,14,12,19,17,7,19,22,28,28,22,19,24,26,26,57,36,33,21,25,9,9,16,25,29,27,54,59,26,35,24,10,25,23,21,11,26,61,28,31,33,23,9,18,11,14,16,5,9,10,9,50,9,6,4,1,8,15,5,13,36,24,49,38,17,24,5,12,20,12,4,8,3,2,6,0,4,6,3,12,21,2,7,145,27,32,105,17,12,26,27,18,72,36,48,118,101,78,19,11,14,34,52,20,10,11,6,25,21,24,10,13,13,12,2,7,13,17,21,39,36,17,42,31,10,11,31,16,26,16,14,9,8,15,19,10,26,36,48,22,13,14,7,31,37,27,24,11,30,75,64,22,31,26,27,47,32,23,18,13,17,15,9,8,2,3,1,3,4,8,4,13,30,15,14,17,4,12,18,22,28,26,12,10,29,50,39,26,30,15,15,16,9,23,38,16,19,68,27,39,22,20,36,41,9,11,4,24,21,21,27,20,25,21,35,22,25,25,39,37,10,42,61,28,22,13,3,20,12,10,7,27,26,23,46,42,40,38,36,46,50,45,47,19,33,48,32,62,59,38,43,56,38,90,42,29,25,47,18,33,32,48,29,54,34,30,55,45,41,84,78,40,51,45,34,25,60,46,32,15,17,34,33,39,37,21,42,30,58,34,43,23,28,50,36,60,41,64,108,108,117,76,50,49,71,36,40,33,19,24,12,28,27,33,34,26,13,11,10,15,25,29,25,13,18,27,54,31,30,33,25,28,28,16,16,10,23,8,8,21,21,14,15,35,29,36,25,38,45,19,8,24,13,18,26,19,139,65,32,42,25,5,34,39,20,20,15,28,27,37,23,36,22,35,11,26,14,45,20,32,19,9,29,25,24,44,15,27,48,98,22,32,16,30,19,13,20,29,15,12,18,15,13,22,11,33,28,29,32,20,22,12,25,31,39,31,30,12,14,23,20,32,14,10,18,10,33,30,42,28,18,38,30,21,26,26,37,21,25,19,14,18,19,42,18,14,22,26,12,15,32,19,20,21,35,15,20,44,47,43,35,56,14,48,57,26,37,37,29,20,29,20,12,30,28,29,26,52,42,51,48,31,36,40,41,38,75,62,49,39,45,38,28,33,34,24,29,24,9,14,18,14,21,20,51,52,72,70,48,45,46,42,46,45,47,33,23,44,36,67,34,40,42,40,43,58,39,44,46,52,44,38,39,43,28,46,40,39,35,30,23,31,30,14,20,14,13,24,23,18,14,19,17,26,15,8,20,16,14,13,20,17,20,17,15,6,26,20,11,5,36,22,13,10,25,28,17,24,15,40,27,18,29,36,29,30,15,28,18,16,21,12,31,24,14,12,20,22,22,31,54,44,24,20,29,35,34,38,23,18,35,44,23,27,28,22,24,24,42,24,22,9,16,16,19,13,30,23,22,24,8,15,26,14,22,35,21,15,17,30,26,15,17,12,16,24,15,15,32,22,8,28,27,45,41,21,16,14,27,19,20,20,24,13,16,20,24,18,14,17,14,18,19,19,16,35,26,25,40,22,32,17,20,16,6,18,13,16,32,68,65,50,24,45,36,25,22,17,20,31,32,24,24,10,12,19,14,17,21,43,8,15,29,16,25,38,15,16,25,19,22,18,13,32,13,11,23,21,8,32,11,15,13,18,18,14,14,23,28,25,22,26,20,19,24,26,31,24,27,36,27,35,12,10,21,22,6]},{"name":"大阪都ふぁん","color":"#4969e1","values":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,6,6,7,1,0,0,0,2,1,0,0,0,1,3,6,10,5,4,1,4,1,4,8,2,1,0,3,9,3,4,32,2,2,0,1,2,9,1,5,12,8,17,11,2,10,9,4,0,0,1,2,0,2,6,11,6,5,0,0,2,1,5,0,0,0,0,0,0,2,2,0,0,0,3,1,0,6,4,13,0,1,6,1,1,1,2,0,5,2,0,0,0,2,3,0,2,1,4,0,0,2,2,0,0,1,2,3,0,1,6,1,0,0,0,0,3,1,0,4,0,0,0,0,0,2,0,3,9,3,24,2,2,0,1,0,1,1,0,2,1,1,1,1,1,3,1,0,8,0,0,0,0,1,0,1,1,3,0,6,6,9,2,1,2,2,3,4,6,6,5,3,2,16,6,1,1,3,0,3,2,3,0,2,0,3,3,5,1,3,2,2,0,0,4,0,0,10,3,2,11,1,3,1,2,2,4,0,0,0,0,6,5,2,5,4,2,2,8,4,2,2,1,5,7,1,1,6,5,0,2,0,0,0,3,1,0,2,1,0,7,4,1,1,3,0,1,0,4,0,9,2,1,2,4,0,0,6,2,1,0,0,2,11,6,0,4,9,16,3,5,7,4,7,0,0,3,0,0,4,1,1,3,2,0,6,12,6,17,25,5,12,5,7,5,9,6,7,9,2,2,7,2,1,2,5,1,5,4,4,2,0,4,5,1,1,12,1,4,5,4,7,4,9,1,2,11,1,1,5,11,3,4,4,1,6,7,1,2,2,11,11,5,1,0,14,6,24,10,13,13,4,5,6,5,2,4,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,3,14,16,8,8,13,3,6,2,3,4,6,1,0,0,3,3,4,3,13,4,1,6,1,2,2,1,5,4,3,26,20,22,23,14,7,6,3,9,0,4,13,7,2,2,5,13,5,13,16,8,4,15,6,16,7,14,10,25,3,6,10,3,6,3,10,7,14,4,3,9,14,6,12,23,2,3,12,5,4,10,4,15,19,8,0,5,2,4,1,3,1,4,2,2,2,4,4,4,6,1,2,0,4,6,19,2,5,6,6,2,2,6,6,7,4,3,3,4,2,6,4,15,2,3,12,5,3,5,7,4,8,6,1,8,9,7,5,6,4,0,3,0,0,5,4,41,11,5,9,13,2,5,7,4,9,5,2,3,4,0,1,2,2,1,3,1,3,2,3,5,0,4,2,10,2,3,3,4,0,10,7,2,6,4,11,17,12,2,7,3,3,1,5,6,3,8,10,7,5,7,3,1,1,8,2,2,0,2,1,1,3,5,12,5,3,7,5,1,2,5,3,2,2,2,5,6,3,1,4,1,2,1,3,3,2,9,2,4,9,7,0,4,6,3,1,1,3,3,2,6,7,5,6,6,1,7,16,4,3,1,4,9,1,8,10,4,3,8,15,33,24,25,40,23,9,11,15,7,4,5,8,3,6,2,2,8,12,19,8,7,7,4,9,3,5,4,5,4,8,5,6,3,12,14,4,5,9,5,7,3,3,7,3,4,4,3,4,3,3,6,6,8,4,3,2,3,1,3,0,7,6,7,10,4,3,4,3,3,3,10,5,6,3,3,11,4,1,1,4,4,5,5,2,8,11,7,4,17,9,7,5,7,4,3,5,2,0,4,7,4,17,3,11,8,6,3,3,5,6,4,7,7,3,7,2,3,11,10,14,5,9,10,3,0,2,1,4,1]},{"name":"東京都ふぁん","color":"#ff0000","values":[]},{"name":"律令国ふぁん","color":"#843c0c","values":[]},{"name":"六大陸ふぁん","color":"#548235","values":[]},{"name":"空想鉄道","color":"#0070c0","values":[]},{"name":"空想道路","color":"#00994e","values":[]},{"name":"空想地図","color":"#ff9900","values":[]},{"name":"空想路線図","color":"#b41c04","values":[]},{"name":"空想図画","color":"#800e80","values":[]},{"name":"空想文章","color":"#113311","values":[]},{"name":"空想別館","color":"#1f2f54","values":[]},{"name":"時くら","color":"#666666","values":[]},{"name":"点くら","color":"#008080","values":[]},{"name":"顔くら","color":"#6699ff","values":[]},{"name":"問くら","color":"#3949ab","values":[]},{"name":"閑くら","color":"#c53258","values":[]},{"name":"経くら","color":"#e6aa0e","values":[]},{"name":"地図ぬりえ","color":"#5b9bd5","values":[]}];
+  const visibility = rawSeries.map(() => true);
+  const totalLen = Math.max(...rawSeries.map(s => s.values.length), 1);
+  const startEl = document.getElementById('viewRangeStart');
+  const endEl = document.getElementById('viewRangeEnd');
+  const resetEl = document.getElementById('viewRangeReset');
+  const togglesEl = document.getElementById('viewSeriesToggles');
+
+  if (rawSeries.length > 1) {
+    togglesEl.innerHTML = rawSeries.map((s, idx) =>
+      '<label style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#fff;border:1px solid #cbd5e1;border-radius:9999px;font-size:12px;font-weight:bold;color:#334155;cursor:pointer;user-select:none;">' +
+        '<input type="checkbox" data-idx="' + idx + '" checked style="accent-color:' + s.color + ';cursor:pointer;">' +
+        '<span style="width:10px;height:10px;border-radius:9999px;background:' + s.color + ';display:inline-block;"></span>' +
+        '<span>' + s.name + '</span>' +
+      '</label>'
+    ).join('');
+  } else {
+    togglesEl.style.display = 'none';
+  }
+
+  function buildData() {
+    let s = parseInt(startEl.value, 10);
+    let e = parseInt(endEl.value, 10);
+    s = (!isNaN(s) && s >= 1) ? Math.min(s, totalLen) : 1;
+    e = (!isNaN(e) && e >= 1) ? Math.min(e, totalLen) : totalLen;
+    if (e < s) e = s;
+    const labels = Array.from({ length: e - s + 1 }, (_, i) => String(s + i));
+    const datasets = rawSeries
+      .map((item, idx) => ({ item, idx }))
+      .filter(({ idx }) => visibility[idx])
+      .map(({ item }) => ({
+        label: item.name,
+        data: item.values.slice(s - 1, e),
+        borderColor: item.color,
+        backgroundColor: item.color + '20',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#ffffff',
+        pointBorderColor: item.color,
+        pointBorderWidth: 0,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        fill: false,
+        tension: 0.4
+      }));
+    return { labels, datasets };
+  }
+
+  const chart = new Chart(document.getElementById('myCustomChart'), {
+    type: 'line',
+    data: buildData(),
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      scales: { y: {"beginAtZero":true} },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  function updateView() {
+    const next = buildData();
+    chart.data.labels = next.labels;
+    chart.data.datasets = next.datasets;
+    chart.update();
+  }
+
+  togglesEl.addEventListener('change', (e) => {
+    if (e.target && e.target.dataset.idx !== undefined) {
+      const idx = parseInt(e.target.dataset.idx, 10);
+      visibility[idx] = e.target.checked;
+      e.target.parentElement.style.opacity = e.target.checked ? '1' : '0.45';
+      updateView();
+    }
+  });
+
+  startEl.addEventListener('input', updateView);
+  endEl.addEventListener('input', updateView);
+  resetEl.addEventListener('click', () => {
+    startEl.value = '';
+    endEl.value = '';
+    updateView();
+  });
+  const yMinEl = document.getElementById('viewYMin');
+  const yMaxEl = document.getElementById('viewYMax');
+  const yResetEl = document.getElementById('viewYReset');
+
+  function updateYBounds() {
+    const minRaw = yMinEl.value.trim();
+    const maxRaw = yMaxEl.value.trim();
+    const defMin = undefined;
+    const defMax = undefined;
+    const minVal = (minRaw !== '' && !isNaN(parseFloat(minRaw))) ? parseFloat(minRaw) : defMin;
+    const maxVal = (maxRaw !== '' && !isNaN(parseFloat(maxRaw))) ? parseFloat(maxRaw) : defMax;
+    chart.options.scales.y.min = minVal;
+    chart.options.scales.y.max = maxVal;
+    chart.options.scales.y.beginAtZero = (minVal === undefined);
+    chart.update();
+  }
+
+  yMinEl.addEventListener('input', updateYBounds);
+  yMaxEl.addEventListener('input', updateYBounds);
+  yResetEl.addEventListener('click', () => {
+    yMinEl.value = '';
+    yMaxEl.value = '';
+    updateYBounds();
+  });
+})();
+</script>
